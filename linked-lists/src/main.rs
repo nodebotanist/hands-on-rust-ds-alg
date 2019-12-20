@@ -1,10 +1,11 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+// gives the Clone functionality
 #[derive(Clone)]
 struct Node {
     value: String,
-    next: Option<Rc<RefCell<Node>>>
+    next: Option<Rc<RefCell<Node>>> // uses Rc<RefCell>> for ownership
 }
 
 impl Node {
@@ -28,13 +29,29 @@ impl TransactionLog {
     }
 
     pub fn append(&mut self, value: String) {
-        let newNode = Node::new(value);
+        let new_node = Node::new(value);
         match self.tail.take() {
-            Some(oldTail) => oldTail.borrow_mut().next = Some(newNode.clone()),
-            None => self.head = Some(newNode.clone())
+            Some(old_tail) => old_tail.borrow_mut().next = Some(new_node.clone()),
+            None => self.head = Some(new_node.clone())
         };
         self.length += 1;
-        self.tail = Some(newNode)
+        self.tail = Some(new_node)
+    }
+
+    pub fn pop(&mut self) -> Option<String> {
+        self.head.take().map(|head| {
+            if let Some(next) = head.borrow_mut().next.take() {
+                self.head = Some(next);
+            } else {
+                self.tail.take();
+            }
+            self.length -= 1;
+            Rc::try_unwrap(head)
+                .ok()
+                .expect("Something went wrong unwrapping the list Node")
+                .into_inner()
+                .value
+        })
     }
 }
 
