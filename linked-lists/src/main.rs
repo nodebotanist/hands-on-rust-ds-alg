@@ -56,5 +56,15 @@ impl TransactionLog {
 }
 
 pub fn main() {
-
+    let mut log = TransactionLog::new_empty();
+    log.append(String::from("Hello"));
+    log.append(String::from("World!"));
+    match log.pop() {
+        Some(text) => println!("{}", text),
+        None => println!("No list item!")
+    }
+    match log.pop() {
+        Some(text) => println!("{}", text),
+        None => println!("No list item!")
+    }
 }
