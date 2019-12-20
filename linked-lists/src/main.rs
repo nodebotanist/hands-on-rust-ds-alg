@@ -26,6 +26,16 @@ impl TransactionLog {
     pub fn new_empty() -> TransactionLog {
         TransactionLog { head: None, tail: None, length: 0 }
     }
+
+    pub fn append(&mut self, value: String) {
+        let newNode = Node::new(value);
+        match self.tail.take() {
+            Some(oldTail) => oldTail.borrow_mut().next = Some(newNode.clone()),
+            None => self.head = Some(newNode.clone())
+        };
+        self.length += 1;
+        self.tail = Some(newNode)
+    }
 }
 
 pub fn main() {
