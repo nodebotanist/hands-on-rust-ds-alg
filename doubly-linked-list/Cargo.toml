@@ -1,0 +1,7 @@
+[package]
+name = "linked-lists"
+version = "0.1.0"
+authors = ["Mx. Kas Perch <the@nodebotani.st>"]
+edition = "2018"
+
+[dependencies]
