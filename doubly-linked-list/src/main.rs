@@ -2,24 +2,29 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 // gives the Clone functionality
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Node {
     value: String,
-    next: Option<Rc<RefCell<Node>>> // uses Rc<RefCell>> for ownership
+    next: Link,
+    prev: Link // uses Rc<RefCell>> for ownership
 }
+
+type Link = Option<Rc<RefCell<Node>>>;
 
 impl Node {
     fn new(value: String) -> Rc<RefCell<Node>> {
         Rc::new(RefCell::new(Node {
             value: value,
+            prev: None,
             next: None
         }))
     }
 }
 
+#[derive(Clone, Debug)]
 struct TransactionLog {
-    head: Option<Rc<RefCell<Node>>>,
-    tail: Option<Rc<RefCell<Node>>>,
+    head: Link,
+    tail: Link,
     pub length: u64
 }
 
@@ -53,6 +58,51 @@ impl TransactionLog {
                 .value
         })
     }
+}
+
+pub struct ListIterator {
+    current: Link
+}
+
+impl ListIterator {
+    fn new(start_at: Link) -> ListIterator {
+        ListIterator {
+            current: start_at
+        }
+    }
+}
+
+impl Iterator for ListIterator {
+    type Item = String;
+    fn next(&mut self) -> Option<String> {
+        let current = &self.current;
+        let mut result = None;
+        self.current = match current {
+            Some(ref current) => {
+                let current = current.borrow();
+                result = Some(current.value.clone());
+                current.next.clone()
+            },
+            None => None
+        };
+        result
+    }
+}
+
+impl DoubleEndedIterator for ListIterator {
+    fn next_back(&mut self) -> Option<String> {
+        let current = &self.current;
+        let mut result = None;
+        self.current = match current {
+            Some(ref current) => {
+                let current = current.borrow();
+                result = Some(current.value.clone());
+                current.prev.clone()  
+            },
+            None => None
+        };
+        result
+    }  
 }
 
 pub fn main() {
